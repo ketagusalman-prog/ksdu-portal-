@@ -19,7 +19,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7124/7124113.png">
 
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; --purple: #8b5cf6; --orange: #f59e0b; --indigo: #6366f1; --danger: #ef4444; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; --purple: #8b5cf6; --orange: #f59e0b; --indigo: #6366f1; --danger: #ef4444; --cyan: #06b6d4; }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         
         /* GİRİŞ EKRANI */
@@ -43,9 +43,9 @@
         .nav-card::after { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px; }
         
         /* Buton Renk Şeritleri */
-        .btn-takip::after { background: var(--purple); }
-        .btn-an::after { background: var(--orange); }
         .btn-mpsr::after { background: var(--indigo); }
+        .btn-izin::after { background: var(--orange); }
+        .btn-kisi::after { background: var(--cyan); }
         
         .nav-card b { font-size: 16px; display: block; margin-bottom: 2px; }
         .nav-card span { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -70,22 +70,22 @@
         <h2 class="portal-title">Umut Salman | İzleme Merkezi</h2>
         
         <div class="grid-layout">
-            <!-- KASA TAKİP -->
-            <a href="https://ketagusalman-prog.github.io/kasa-takip/" target="_blank" class="nav-card btn-takip">
-                <div style="text-align: left;"><span>Operasyonel İzleme</span><b>Kasa Takip Sistemi</b></div>
-                <div class="go-icon">📊</div>
-            </a>
-
-            <!-- KASA-N- -->
-            <a href="https://ketagusalman-prog.github.io/kasa-n-/" target="_blank" class="nav-card btn-an">
-                <div style="text-align: left;"><span>Analiz & Raporlama</span><b>Kasa Analitik (N)</b></div>
-                <div class="go-icon">🔍</div>
-            </a>
-
             <!-- MPSR PERFORMANS -->
             <a href="mpsr.html" target="_blank" class="nav-card btn-mpsr">
                 <div style="text-align: left;"><span>Verimlilik İzleme</span><b>MPSR Performans</b></div>
                 <div class="go-icon">⚡</div>
+            </a>
+
+            <!-- İZİN TAKİP -->
+            <a href="izin.html" target="_blank" class="nav-card btn-izin">
+                <div style="text-align: left;"><span>Operasyonel Planlama</span><b>İzin Takip Sistemi</b></div>
+                <div class="go-icon">📅</div>
+            </a>
+
+            <!-- KİŞİSEL BİLGİ -->
+            <a href="kişi.html" target="_blank" class="nav-card btn-kisi">
+                <div style="text-align: left;"><span>Personel Yönetimi</span><b>Personel Bilgi Kartı</b></div>
+                <div class="go-icon">👤</div>
             </a>
         </div>
         
