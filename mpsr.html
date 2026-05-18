@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>M4 | Performans ve Sapma Analiz Raporu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #090d16; --card-bg: #131c2e; --text: #f8fafc; --text-muted: #64748b; --accent: #3b82f6; --danger: #ef4444; --warning: #f59e0b; --success: #10b981; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 30px; }
+        .container { max-width: 1500px; margin: auto; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
+        h1 { font-weight: 800; font-size: 32px; letter-spacing: -1.5px; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .filter-section { background: var(--card-bg); padding: 20px 25px; border-radius: 16px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,0.2); gap: 15px; flex-wrap: wrap; }
+        .filter-group-container { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; flex: 1; }
+        .filter-group { display: flex; align-items: center; gap: 10px; }
+        .filter-section label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; white-space: nowrap; }
+        .filter-section select { background: #090d16; color: white; padding: 10px 15px; border: 1px solid #1e293b; border-radius: 10px; outline: none; font-weight: 600; cursor: pointer; transition: 0.3s; min-width: 160px; font-size: 13px; }
+        .filter-section select:hover { border-color: var(--accent); }
+
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .meta-card { background: var(--card-bg); padding: 24px; border-radius: 20px; border: 1px solid #1e293b; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+        .meta-card h3 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; font-weight: 800; }
+        .meta-card .val { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+        
+        .card-note { font-size: 10px; color: var(--text-muted); line-height: 1.3; margin-top: 8px; font-weight: 500; border-top: 1px solid #1e293b; padding-top: 6px; }
+
+        .chart-wrapper { width: 100%; background: #090d16; height: 6px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .chart-bar { height: 100%; width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .report-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 25px; }
+        .report-card { background: var(--card-bg); border-radius: 24px; padding: 25px; border: 1px solid #1e293b; display: flex; flex-direction: column; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .col-6 { grid-column: span 6; }
+        .col-12 { grid-column: span 12; }
+        
+        .report-card h2 { font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 15px; letter-spacing: -0.5px; }
+        .counter-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 800; }
+
+        .p-list { display: flex; flex-direction: column; gap: 12px; max-height: 420px; overflow-y: auto; padding-right: 5px; }
+        
+        .p-row { background: #090d16; padding: 18px; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; border: 1px solid transparent; transition: 0.2s; }
+        .p-row:hover { border-color: #1e293b; transform: translateY(-2px); }
+        .p-row-header { display: flex; justify-content: space-between; align-items: center; }
+        
+        .p-info .name { font-weight: 700; font-size: 15px; color: #fff; }
+        .p-info .sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+        
+        .perf-progress-container { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-muted); font-weight: 700; }
+        .perf-bar-bg { flex: 1; background: #131c2e; height: 8px; border-radius: 4px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.8s ease; }
+
+        .badge-crit { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-warn { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-succ { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+        .no-data { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; font-weight: 600; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+
+        @media print {
+            body { background: white !important; color: #0f172a !important; padding: 0 !important; }
+            .container { max-width: 100% !important; width: 100% !important; }
+            h1 { background: none !important; -webkit-text-fill-color: initial !important; color: #0f172a !important; }
+            .filter-section, #loader { display: none !important; }
+            .meta-card, .report-card, .p-row { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; color: #0f172a !important; box-shadow: none !important; page-break-inside: avoid; }
+            .val, .p-info .name { color: #0f172a !important; }
+            .p-list { max-height: none !important; overflow: visible !important; }
+            .perf-bar-bg { background: #e2e8f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .perf-bar-fill, .chart-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .col-6 { grid-column: span 12 !important; }
+            .card-note { display: block !important; color: #475569 !important; border-top-color: #cbd5e1 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Mağaza Performans Sapma Raporu</h1>
+            <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Genel verimliliği olumsuz etkileyen kayıplar ve yukarı taşıyan yıldızlar</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="loader" style="font-size: 14px; color: var(--accent); font-weight: bold; background: rgba(59, 130, 246, 0.1); padding: 8px 16px; border-radius: 20px;">🔄 Canlı Veriler İşleniyor...</div>
+        </div>
+    </header>
+
+    <div class="filter-section">
+        <div class="filter-group-container">
+            <div class="filter-group">
+                <label>Mağaza:</label>
+                <select id="reportMagaza" onchange="raporla()"></select>
+            </div>
+            <div class="filter-group">
+                <label>Pozisyon:</label>
+                <select id="reportGorev" onchange="raporla()"></select>
+            </div>
+            <div class="filter-group">
+                <label>Grup:</label>
+                <select id="reportGrup" onchange="raporla()"></select>
+            </div>
+            <div class="filter-group">
+                <label>Vardiya:</label>
+                <select id="reportVardiya" onchange="raporla()"></select>
+            </div>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;" id="live-rate">Güncel Kur Yükleniyor...</div>
+    </div>
+
+    <!-- Grafiksel İndikatör Kartları -->
+    <div class="meta-grid">
+        <div class="meta-card">
+            <h3>Seçili Küme Fiş Ortalaması</h3>
+            <div class="val" id="mFis">0</div>
+            <div class="chart-wrapper"><div id="barFis" class="chart-bar" style="background: var(--accent);"></div></div>
+            <div class="card-note">Seçtiğiniz filtre içerisindeki personellerin kişi başı ortalama fiş adedi.</div>
+        </div>
+        <div class="meta-card">
+            <h3>Standart Sapma Limiti</h3>
+            <div class="val" id="mSapma">0</div>
+            <div class="chart-wrapper"><div id="barSapma" class="chart-bar" style="background: #94a3b8;"></div></div>
+            <div class="card-note">Grup içindeki işlem dengesini gösterir. Bu değer kadar ortalamanın altında kalanlar risklidir.</div>
+        </div>
+        <div class="meta-card">
+            <h3>Fiş Başı Ciro Hedefi</h3>
+            <div class="val" id="mHedef">₺0</div>
+            <div class="chart-wrapper"><div id="barHedef" class="chart-bar" style="background: var(--success);"></div></div>
+            <div class="card-note">İlgili kümenin toplam cirosunun toplam fiş sayısına bölünmesiyle elde edilen sepet hedefi.</div>
+        </div>
+        <div class="meta-card">
+            <h3>Küme Risk Oranı</h3>
+            <div class="val" id="mKritik" style="color: var(--danger);">0</div>
+            <div class="chart-wrapper"><div id="barKritik" class="chart-bar" style="background: var(--danger);"></div></div>
+            <div class="card-note"><strong>Nedir?</strong> Kümedeki personellerden yüzde kaçının fiş hacminde standart sapma limitinin altında (kritik) kaldığını gösterir. Yüksek oran verimsizliği işaret eder.</div>
+        </div>
+    </div>
+
+    <div class="report-grid">
+        <div class="report-card col-6">
+            <h2>
+                <span style="color: var(--danger); display:flex; align-items:center; gap:8px;">📉 Fiş Hacmini Bozanlar</span>
+                <span id="countHacim" class="counter-badge badge-crit">0 Personel</span>
+            </h2>
+            <div class="p-list" id="listHacim"></div>
+        </div>
+
+        <div class="report-card col-6">
+            <h2>
+                <span style="color: var(--warning); display:flex; align-items:center; gap:8px;">⚠️ Sepet Ortalamasını Düşürenler</span>
+                <span id="countSepet" class="counter-badge badge-warn">0 Personel</span>
+            </h2>
+            <div class="p-list" id="listSepet"></div>
+        </div>
+
+        <div class="report-card col-12">
+            <h2>
+                <span style="color: var(--success); display:flex; align-items:center; gap:8px;">💎 Mağazayı Yukarı Taşıyan Yıldızlar</span>
+                <span id="countYildiz" class="counter-badge badge-succ">0 Personel</span>
+            </h2>
+            <div class="p-list" id="listYildizlar"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVZ7VcV3Nob8Z2eEVrTSECZAlVbPH0eOikAJ585JEPdebcXMhvXw8DwF_T8UoM-TufsQ/exec";
+    let rawData = [];
+    let euroRate = 36.50;
+
+    function getUnvanValue(person) {
+        const olasiBasliklar = ['pozisyon', 'POZİSYON', 'unvan', 'gorev', 'görev', 'gorevtanimi', 'görev tanımı'];
+        for (let baslik of olasiBasliklar) {
+            if (person[baslik] !== undefined && person[baslik] !== null) return String(person[baslik]).trim();
+        }
+        for (let key in person) {
+            if (key.toLowerCase().includes('pozisyon') || key.toLowerCase().includes('unvan') || key.toLowerCase().includes('gorev')) return String(person[key]).trim();
+        }
+        return "Belirtilmemiş";
+    }
+
+    function getGrupValue(person) {
+        const olasiGrup = ['grup', 'GRUP', 'group', 'ekip', 'EKİP'];
+        for (let g of olasiGrup) {
+            if (person[g] !== undefined && person[g] !== null) return String(person[g]).trim();
+        }
+        return "Belirtilmemiş";
+    }
+
+    async function verileriYukle() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const responseData = await res.json();
+            euroRate = parseFloat(responseData.kur) || 36.50;
+            rawData = responseData.data.filter(x => x.sicil && x.isim);
+            
+            document.getElementById('live-rate').innerText = `EUR REEL KUR: ₺${euroRate.toFixed(2)}`;
+            
+            const selectMagaza = document.getElementById('reportMagaza');
+            const magazalar = [...new Set(rawData.map(x => String(x.magaza || "Tanımsız").trim()))];
+            selectMagaza.innerHTML = '<option value="Hepsi">Tüm Mağazalar</option>';
+            magazalar.forEach(m => { if(m !== "Tanımsız") selectMagaza.innerHTML += `<option value="${m}">${m}</option>`; });
+            
+            const selectGorev = document.getElementById('reportGorev');
+            const unvanlar = [...new Set(rawData.map(p => getUnvanValue(p)))].filter(u => u !== "Belirtilmemiş" && u !== "");
+            selectGorev.innerHTML = '<option value="Hepsi">Tüm Pozisyonlar</option>';
+            unvanlar.forEach(u => { selectGorev.innerHTML += `<option value="${u}">${u}</option>`; });
+
+            const selectGrup = document.getElementById('reportGrup');
+            const gruplar = [...new Set(rawData.map(p => getGrupValue(p)))].filter(g => g !== "Belirtilmemiş" && g !== "");
+            selectGrup.innerHTML = '<option value="Hepsi">Tüm Gruplar</option>';
+            gruplar.forEach(g => { selectGrup.innerHTML += `<option value="${g}">${g}</option>`; });
+
+            const selectVardiya = document.getElementById('reportVardiya');
+            const vardiyalar = [...new Set(rawData.map(x => String(x.vardiya || "").trim()))].filter(v => v !== "" && v !== "undefined" && v !== "null");
+            selectVardiya.innerHTML = '<option value="Hepsi">Tüm Vardiyalar</option>';
+            vardiyalar.forEach(v => { selectVardiya.innerHTML += `<option value="${v}">${v}</option>`; });
+            
+            document.getElementById('loader').style.display = 'none';
+            raporla();
+        } catch (e) {
+            document.getElementById('loader').innerText = "❌ Bağlantı Hatası!";
+        }
+    }
+
+    function raporla() {
+        const seciliMagaza = document.getElementById('reportMagaza').value;
+        const seciliGorev = document.getElementById('reportGorev').value;
+        const seciliGrup = document.getElementById('reportGrup').value;
+        const seciliVardiya = document.getElementById('reportVardiya').value;
+        
+        let dataset = rawData.filter(p => {
+            const mMatch = (seciliMagaza === "Hepsi" || String(p.magaza).trim() === seciliMagaza);
+            const gMatch = (seciliGorev === "Hepsi" || getUnvanValue(p) === seciliGorev);
+            const grupMatch = (seciliGrup === "Hepsi" || getGrupValue(p) === seciliGrup);
+            const vMatch = (seciliVardiya === "Hepsi" || String(p.vardiya).trim() === seciliVardiya);
+            return mMatch && gMatch && grupMatch && vMatch;
+        });
+
+        const fisList = dataset.map(p => parseFloat(p.fis) || 0);
+        const meanFis = fisList.reduce((a, b) => a + b, 0) / (fisList.length || 1);
+        const stdDevFis = Math.sqrt(fisList.map(x => Math.pow(x - meanFis, 2)).reduce((a, b) => a + b, 0) / (fisList.length || 1));
+        
+        const totalCiro = dataset.reduce((acc, p) => acc + (parseFloat(p.tl) || 0) + ((parseFloat(p.euro) || 0) * euroRate), 0);
+        const totalFis = fisList.reduce((a, b) => a + b, 0) || 1;
+        const grupFisBasiCiro = totalCiro / totalFis;
+
+        document.getElementById('mFis').innerText = meanFis.toFixed(1);
+        document.getElementById('mSapma').innerText = `±${stdDevFis.toFixed(1)}`;
+        document.getElementById('mHedef').innerText = `₺${Math.round(grupFisBasiCiro).toLocaleString('tr-TR')}`;
+
+        const listHacim = document.getElementById('listHacim');
+        const listSepet = document.getElementById('listSepet');
+        const listYildizlar = document.getElementById('listYildizlar');
+        
+        listHacim.innerHTML = '';
+        listSepet.innerHTML = '';
+        listYildizlar.innerHTML = '';
+
+        let cCrit = 0, cWarn = 0, cSucc = 0;
+
+        const maxFisVal = Math.max(...fisList, 1);
+        const maxCiroVal = Math.max(...dataset.map(p => (parseFloat(p.tl) || 0) + ((parseFloat(p.euro) || 0) * euroRate)), 1);
+
+        dataset.forEach(p => {
+            const fis = parseFloat(p.fis) || 0;
+            const ciro = (parseFloat(p.tl) || 0) + ((parseFloat(p.euro) || 0) * euroRate);
+            const personelFisBasiCiro = ciro / (fis || 1);
+            const unvanEtiketi = getUnvanValue(p);
+            const grupEtiketi = getGrupValue(p);
+            
+            const devStatus = fis < (meanFis - stdDevFis) ? "KRİTİK FİŞ" : (fis < meanFis ? "ORTALAMA ALTI" : "BAŞARILI");
+            const tolerances = fis > (meanFis * 1.2) ? 0.7 : 0.85;
+            const esikDeger = grupFisBasiCiro * tolerances;
+            const upsellNeed = (personelFisBasiCiro < esikDeger && fis > 0) ? "⚠️ KASA ÖNÜ ARTIRILMALI" : (personelFisBasiCiro > (grupFisBasiCiro * 1.2) ? "💎 YÜKSEK VERİMLİLİK" : "SATIŞ DENGELİ");
+
+            const fisPct = Math.min((fis / maxFisVal) * 100, 100);
+            const ciroPct = Math.min((ciro / maxCiroVal) * 100, 100);
+
+            if (devStatus === "KRİTİK FİŞ" || devStatus === "ORTALAMA ALTI") {
+                cCrit++;
+                const isKritik = devStatus === "KRİTİK FİŞ";
+                listHacim.innerHTML += `
+                    <div class="p-row">
+                        <div class="p-row-header">
+                            <div class="p-info">
+                                <div class="name">${p.isim} <span style="font-size:11px; color:var(--accent);">[${unvanEtiketi}]</span></div>
+                                <div class="sub">Sicil: ${p.sicil} | ${p.magaza} | ${grupEtiketi !== 'Belirtilmemiş' ? 'Grup: ' + grupEtiketi : p.vardiya || 'Belirsiz'}</div>
+                            </div>
+                            <div class="counter-badge ${isKritik ? 'badge-crit' : 'badge-warn'}">${Math.round(fis)} Fiş</div>
+                        </div>
+                        <div class="perf-progress-container">
+                            <span>Hacim Grafiği:</span>
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${fisPct}%; background: ${isKritik ? 'var(--danger)' : 'var(--warning)'}"></div></div>
+                            <span>${fisPct.toFixed(0)}%</span>
+                        </div>
+                    </div>`;
+            }
+
+            if (upsellNeed === "⚠️ KASA ÖNÜ ARTIRILMALI") {
+                cWarn++;
+                const sepetBasariOrani = Math.min((personelFisBasiCiro / grupFisBasiCiro) * 100, 100);
+                listSepet.innerHTML += `
+                    <div class="p-row">
+                        <div class="p-row-header">
+                            <div class="p-info">
+                                <div class="name">${p.isim} <span style="font-size:11px; color:var(--accent);">[${unvanEtiketi}]</span></div>
+                                <div class="sub">Toplam Ciro: ₺${Math.round(ciro).toLocaleString('tr-TR')} | Fiş: ${Math.round(fis)}</div>
+                            </div>
+                            <div class="counter-badge badge-warn">₺${Math.round(personelFisBasiCiro)} / Fiş</div>
+                        </div>
+                        <div class="perf-progress-container">
+                            <span>Hedef Uyum Oranı:</span>
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${sepetBasariOrani}%; background: var(--warning)"></div></div>
+                            <span>${sepetBasariOrani.toFixed(0)}%</span>
+                        </div>
+                    </div>`;
+            }
+
+            if (devStatus === "BAŞARILI" || upsellNeed === "💎 YÜKSEK VERİMLİLİK") {
+                cSucc++;
+                listYildizlar.innerHTML += `
+                    <div class="p-row" style="background: linear-gradient(90deg, #090d16, #111b2e);">
+                        <div class="p-row-header">
+                            <div class="p-info">
+                                <div class="name">🚀 ${p.isim} <span style="font-size:11px; color:#93c5fd;">[${unvanEtiketi}]</span></div>
+                                <div class="sub">${p.magaza} | Fiş Başı Ciro: ₺${Math.round(personelFisBasiCiro)} | İşlem: ${Math.round(fis)} Fiş</div>
+                            </div>
+                            <div class="counter-badge badge-succ">₺${Math.round(ciro).toLocaleString('tr-TR')}</div>
+                        </div>
+                        <div class="perf-progress-container">
+                            <span>Ciro Katkı Payı:</span>
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${ciroPct}%; background: var(--success)"></div></div>
+                            <span>Liderlik Gücü</span>
+                        </div>
+                    </div>`;
+            }
+        });
+
+        document.getElementById('countHacim').innerText = `${cCrit} Personel`;
+        document.getElementById('countSepet').innerText = `${cWarn} Personel`;
+        document.getElementById('countYildiz').innerText = `${cSucc} Personel`;
+        
+        const riskOrani = dataset.length ? ((cCrit / dataset.length) * 100) : 0;
+        document.getElementById('mKritik').innerText = `%${riskOrani.toFixed(0)}`;
+
+        setTimeout(() => {
+            document.getElementById('barFis').style.width = "75%";
+            document.getElementById('barSapma').style.width = "40%";
+            document.getElementById('barHedef').style.width = "85%";
+            document.getElementById('barKritik').style.width = `${riskOrani}%`;
+        }, 100);
+
+        if(listHacim.innerHTML === '') listHacim.innerHTML = '<div class="no-data">Bu filtrede hacmi düşüren kritik profil bulunmuyor. 👍</div>';
+        if(listSepet.innerHTML === '') listSepet.innerHTML = '<div class="no-data">Harika! Seçili filtredeki tüm personeller sepet hedef limitinin üzerinde. 💎</div>';
+        if(listYildizlar.innerHTML === '') listYildizlar.innerHTML = '<div class="no-data">Ortalamayı yükselten profil bulunamadı.</div>';
+    }
+
+    window.onload = verileriYukle;
+</script>
+</body>
+</html>
