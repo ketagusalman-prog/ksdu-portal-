@@ -2,9 +2,22 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Umut Salman | Özel Erişim Portalı</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- ========================================== -->
+    <!-- PWA MOBİL UYGULAMA METADATALARI            -->
+    <!-- ========================================== -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- iOS (Safari) Native App Ayarları -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="M4 Portal">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7124/7124113.png">
+
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; --purple: #8b5cf6; --orange: #f59e0b; --indigo: #6366f1; --danger: #ef4444; }
         body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
@@ -81,6 +94,17 @@
 
 <script>
     const SECRET_PASS = "68545051Us.";
+
+    // ==========================================
+    // SERVICE WORKER KAYIT (PWA AKTİVASYONU)
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA Servisi Aktif.'))
+            .catch(err => console.log('Yükleme hatası:', err));
+        });
+    }
 
     function checkLogin() {
         const val = document.getElementById("passInput").value;
