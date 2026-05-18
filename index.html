@@ -96,12 +96,16 @@
     const SECRET_PASS = "68545051Us.";
 
     // ==========================================
-    // SERVICE WORKER KAYIT (PWA AKTİVASYONU)
+    // GELİŞTİRİLMİŞ SERVICE WORKER KAYDI
     // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('PWA Servisi Aktif.'))
+            .then(reg => {
+                console.log('PWA Servisi Aktif.');
+                // Sunucuda yeni dosya kontrolünü zorla tetikle
+                reg.update();
+            })
             .catch(err => console.log('Yükleme hatası:', err));
         });
     }
