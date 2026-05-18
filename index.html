@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Umut Salman | Özel Erişim Portalı</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2=family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <!-- ========================================== -->
-    <!-- PWA MOBİL UYGULAMA METADATALARI            -->
-    <!-- ========================================== -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     
-    <!-- iOS (Safari) Native App Ayarları -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="M4 Portal">
@@ -20,36 +16,50 @@
 
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; --purple: #8b5cf6; --orange: #f59e0b; --indigo: #6366f1; --danger: #ef4444; --cyan: #06b6d4; }
-        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; overflow-x: hidden; }
         
         /* GİRİŞ EKRANI */
         #loginOverlay { width: 100%; max-width: 400px; text-align: center; }
         .login-card { background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); }
         .login-card h2 { font-weight: 800; font-size: 18px; margin-bottom: 20px; color: var(--accent); }
-        input[type="password"] { width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none; margin-bottom: 15px; font-size: 16px; box-sizing: border-box; text-align: center; transition: 0.3s; }
+        input[type="password"] { width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none; margin-bottom: 15px; font-size: 16px; text-align: center; transition: 0.3s; }
         input[type="password"]:focus { border-color: var(--accent); }
         .btn-login { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-login:hover { opacity: 0.9; transform: scale(1.01); }
 
-        /* PORTAL İÇERİĞİ */
-        #portalContent { display: none; width: 100%; max-width: 600px; text-align: center; animation: fadeIn 0.5s ease forwards; }
+        /* PORTAL İÇERİĞİ KAPSAYICI */
+        #portalContent { display: none; width: 100%; max-width: 500px; text-align: center; animation: fadeIn 0.5s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .portal-title { font-weight: 800; text-transform: uppercase; font-size: 14px; letter-spacing: 2px; color: #94a3b8; margin-bottom: 30px; }
-        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .portal-title { font-weight: 800; text-transform: uppercase; font-size: 14px; letter-spacing: 2px; color: #94a3b8; margin-bottom: 10px; }
+        .portal-subtitle { font-size: 11px; color: #64748b; margin-bottom: 25px; text-transform: uppercase; }
+
+        /* KAYDIRILABİLİR CAROUSEL YAPISI */
+        .carousel-wrapper { width: 100%; overflow: hidden; position: relative; border-radius: 24px; }
         
-        .nav-card { background: var(--card); padding: 20px; border-radius: 20px; text-decoration: none; color: white; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
-        .nav-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .nav-card::after { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px; }
+        .carousel-track { display: flex; scroll-snap-type: x mandatory; overflow-x: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        /* Scrollbar gizleme */
+        .carousel-track::-webkit-scrollbar { display: none; }
+        .carousel-track { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .carousel-slide { min-width: 100%; scroll-snap-align: start; padding: 5px; }
+
+        /* BUTON KART TASARIMLARI */
+        .nav-card { background: var(--card); padding: 35px 25px; border-radius: 20px; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; transition: 0.3s; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+        .nav-card::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 6px; }
         
-        /* Buton Renk Şeritleri */
         .btn-mpsr::after { background: var(--indigo); }
         .btn-izin::after { background: var(--orange); }
         .btn-kisi::after { background: var(--cyan); }
         
-        .nav-card b { font-size: 16px; display: block; margin-bottom: 2px; }
-        .nav-card span { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .go-icon { background: rgba(255,255,255,0.07); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .nav-card b { font-size: 22px; display: block; margin-top: 15px; margin-bottom: 5px; }
+        .nav-card span { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .go-icon { background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: inset 0 0 10px rgba(255,255,255,0.05); }
+
+        /* SAYFA NOKTALARI (DOTS) */
+        .dots-container { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .dot { width: 8px; height: 8px; background: #334155; border-radius: 50%; transition: 0.3s; cursor: pointer; }
+        .dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -67,26 +77,48 @@
 
     <!-- PORTAL İÇERİĞİ -->
     <div id="portalContent">
-        <h2 class="portal-title">Umut Salman | İzleme Merkezi</h2>
+        <h2 class="portal-title">Umut Salman</h2>
+        <div class="portal-subtitle">İzleme Merkezi &bull; Kaydırarak Geçiş Yapın</div>
         
-        <div class="grid-layout">
-            <!-- MPSR PERFORMANS -->
-            <a href="mpsr.html" target="_blank" class="nav-card btn-mpsr">
-                <div style="text-align: left;"><span>Verimlilik İzleme</span><b>MPSR Performans</b></div>
-                <div class="go-icon">⚡</div>
-            </a>
+        <!-- CAROUSEL KAPSAYICI -->
+        <div class="carousel-wrapper">
+            <div class="carousel-track" id="track">
+                
+                <!-- SAYFA 1: MPSR PERFORMANS -->
+                <div class="carousel-slide">
+                    <a href="mpsr.html" target="_blank" class="nav-card btn-mpsr">
+                        <div class="go-icon">⚡</div>
+                        <b>MPSR Performans</b>
+                        <span>Verimlilik İzleme Otomasyonu</span>
+                    </a>
+                </div>
 
-            <!-- İZİN TAKİP -->
-            <a href="izin.html" target="_blank" class="nav-card btn-izin">
-                <div style="text-align: left;"><span>Operasyonel Planlama</span><b>İzin Takip Sistemi</b></div>
-                <div class="go-icon">📅</div>
-            </a>
+                <!-- SAYFA 2: İZİN TAKİP -->
+                <div class="carousel-slide">
+                    <a href="izin.html" target="_blank" class="nav-card btn-izin">
+                        <div class="go-icon">📅</div>
+                        <b>İzin Takip Sistemi</b>
+                        <span>Operasyonel Planlama Havuzu</span>
+                    </a>
+                </div>
 
-            <!-- KİŞİSEL BİLGİ -->
-            <a href="kişi.html" target="_blank" class="nav-card btn-kisi">
-                <div style="text-align: left;"><span>Personel Yönetimi</span><b>Personel Bilgi Kartı</b></div>
-                <div class="go-icon">👤</div>
-            </a>
+                <!-- SAYFA 3: PERSONEL BİLGİ KARTI -->
+                <div class="carousel-slide">
+                    <a href="kişi.html" target="_blank" class="nav-card btn-kisi">
+                        <div class="go-icon">👤</div>
+                        <b>Personel Bilgi Kartı</b>
+                        <span>Personel Veri Kartları</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SAYFA NOKTALARI -->
+        <div class="dots-container">
+            <div class="dot active" onclick="scrollToSlide(0)"></div>
+            <div class="dot" onclick="scrollToSlide(1)"></div>
+            <div class="dot" onclick="scrollToSlide(2)"></div>
         </div>
         
         <button onclick="logout()" style="margin-top: 40px; background: transparent; border: 1px solid #334155; color: #64748b; padding: 10px 25px; border-radius: 12px; cursor: pointer; font-size: 10px; font-weight: 700; text-transform: uppercase; transition: 0.3s;">Oturumu Kapat</button>
@@ -96,20 +128,35 @@
     const SECRET_PASS = "68545051Us.";
 
     // ==========================================
-    // GELİŞTİRİLMİŞ SERVICE WORKER KAYDI
+    // SERVICE WORKER & AKTİF KONTROL
     // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-            .then(reg => {
-                console.log('PWA Servisi Aktif.');
-                // Sunucuda yeni dosya kontrolünü zorla tetikle
-                reg.update();
-            })
-            .catch(err => console.log('Yükleme hatası:', err));
+            navigator.serviceWorker.register('sw.js').then(reg => reg.update());
         });
     }
 
+    // ==========================================
+    // KAYDIRMA VE CAROUSEL DİNAMİKLERİ
+    // ==========================================
+    const track = document.getElementById('track');
+    const dots = document.querySelectorAll('.dot');
+
+    track.addEventListener('scroll', () => {
+        const index = Math.round(track.scrollLeft / track.offsetWidth);
+        dots.forEach((dot, i) => {
+            if(i === index) dot.classList.add('active');
+            else dot.classList.remove('active');
+        });
+    });
+
+    function scrollToSlide(index) {
+        track.scrollLeft = track.offsetWidth * index;
+    }
+
+    // ==========================================
+    // GİRİŞ / ÇIKIŞ SİSTEMİ
+    // ==========================================
     function checkLogin() {
         const val = document.getElementById("passInput").value;
         const err = document.getElementById("errMsg");
@@ -118,6 +165,8 @@
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("portalContent").style.display = "block";
             sessionStorage.setItem("auth_portal_restricted", "active");
+            // Render düzeltmesi için küçük tetikleyici
+            setTimeout(() => { scrollToSlide(0); }, 50);
         } else {
             err.style.display = "block";
             document.getElementById("passInput").value = "";
