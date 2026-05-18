@@ -2,120 +2,570 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>M4 Performans | Kayıt ve Düzenleme</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İzin & Rapor Yönetimi - Umut Salman Asistan</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #3b82f6; --success: #10b981; --text: #f8fafc; --border: rgba(255,255,255,0.1); }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #10b981; --text: #f8fafc; --border: rgba(255, 255, 255, 0.08); --danger: #ef4444; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text); padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 20px; background: var(--card); border-radius: 15px; border: 1px solid var(--border); }
-        .btn-sync { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.3s; }
-        .table-container { background: var(--card); border-radius: 15px; border: 1px solid var(--border); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-        th { background: rgba(59, 130, 246, 0.1); padding: 15px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 12px; border-bottom: 1px solid var(--border); }
-        input { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 8px; width: 100%; font-size: 13px; outline: none; }
-        input:focus { border-color: var(--accent); }
-        input[readonly] { background: transparent; border: none; font-weight: 800; color: #94a3b8; cursor: default; }
-        .btn-save { background: var(--success); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%; transition: 0.2s; }
-        .btn-save:hover { opacity: 0.8; }
-        #statusPopup { position: fixed; bottom: 20px; right: 20px; padding: 15px 30px; border-radius: 12px; color: white; font-weight: 700; display: none; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .container { max-width: 1200px; margin: auto; }
+        h2 { color: var(--accent); margin-bottom: 20px; text-align: center; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: var(--card); color: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: var(--accent); border-color: var(--accent); }
+        .panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        input, select { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; outline: none; width: 100%; }
+        label { font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: 800; }
+        .btn-group { margin-top: 15px; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: 700; transition: 0.3s; }
+        .btn-add { background: var(--accent); color: white; }
+        .btn-excel { background: #1d6f42; color: white; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .nav-btn { background: var(--bg); border: 1px solid var(--border); color: white; padding: 5px 15px; border-radius: 8px; cursor: pointer; font-weight: 800; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 5px; text-align: center; font-weight: 800; font-size: 12px; color: var(--accent); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 5px; }
+        .cal-day { background: var(--bg); border: 1px solid var(--border); min-height: 95px; padding: 8px; border-radius: 8px; position: relative; }
+        .cal-date { font-weight: 800; font-size: 12px; margin-bottom: 5px; opacity: 0.9; display: flex; justify-content: space-between; }
+        .cal-content { font-size: 10px; }
+        .need-staff { background: var(--danger); color: white; padding: 2px 4px; border-radius: 4px; display: block; margin-top: 3px; font-weight: 800; text-align: center; font-size: 9px; line-height: 1.2; }
+        .g1-work-day { background: rgba(59, 130, 246, 0.1) !important; border-top: 3px solid #3b82f6; }
+        .g2-work-day { background: rgba(139, 92, 246, 0.1) !important; border-top: 3px solid #8b5cf6; }
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+        th { background: rgba(16, 185, 129, 0.1); color: var(--accent); text-transform: uppercase; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .g1 { background: #3b82f6; } .g2 { background: #8b5cf6; }
+        .day-picker { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; max-height: 150px; overflow-y: auto; padding: 5px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .day-opt { font-size: 10px; padding: 6px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .day-opt.selected { background: var(--accent); border-color: var(--accent); color: white; }
+        .day-opt.g1-style { border-bottom: 3px solid #3b82f6; }
+        .day-opt.g2-style { border-bottom: 3px solid #8b5cf6; }
     </style>
 </head>
 <body>
 
-<div id="statusPopup"></div>
+<div class="container">
+    <h2>📅 M4 Operasyonel Takip Paneli</h2>
 
-<div class="header">
-    <div>
-        <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -1px;">M4 Performans Yönetimi</h1>
-        <p style="color: #94a3b8; font-size: 13px;">Bağlı URL: ...sVQQ/exec</p>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('kayit')">Kayıt Girişi</button>
+        <button class="tab-btn" onclick="switchTab('vardiya')">Takvim & Takviye</button>
     </div>
-    <button class="btn-sync" onclick="verileriCek()">🔄 Listeyi Yenile</button>
-</div>
 
-<div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 80px;">Sicil</th>
-                <th>İsim</th>
-                <th>Mağaza</th>
-                <th>Vardiya</th>
-                <th>TL Ciro</th>
-                <th>Euro Ciro</th>
-                <th>Adet</th>
-                <th>Fiş</th>
-                <th style="width: 100px;">İşlem</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <tr><td colspan="9" style="text-align:center; padding:50px; color:#94a3b8;">Veriler yükleniyor...</td></tr>
-        </tbody>
-    </table>
+    <div id="kayitPage" class="page active">
+        <div class="panel">
+            <div class="grid-form">
+                <input type="hidden" id="editIndex" value="-1">
+                <div><label>Tür</label><select id="tur"><option value="İzinli">İzinli</option><option value="Raporlu">Raporlu</option></select></div>
+                <div><label>Sicil</label><input type="text" id="sicil" list="sicilList" oninput="otomatikDoldur('sicil')"></div>
+                <div><label>İsim Soyisim</label><input type="text" id="isim" list="isimList" oninput="otomatikDoldur('isim')"></div>
+                <div><label>Grup</label><select id="grup" onchange="generateSpecificDays()"><option value="1. Grup">1. Grup</option><option value="2. Grup">2. Grup</option></select></div>
+                <div><label>Dilim</label><select id="dilim"><option value="Gündüz">Gündüz</option><option value="Gece">Gece</option><option value="Bir-Bir">Bir-Bir</option></select></div>
+                <div><label>Başlangıç</label><input type="date" id="baslangic" onchange="generateSpecificDays()"></div>
+                <div><label>Bitiş</label><input type="date" id="bitis" onchange="generateSpecificDays()"></div>
+                <div><label>Açıklama / Onay Veren</label>
+                    <select id="onayVeren">
+                        <option value="">Seçiniz...</option>
+                        <option value="RAVZA ANIL ÇOBANDAĞ">RAVZA ANIL ÇOBANDAĞ</option>
+                        <option value="OSMAN ÖZKAN ÖZTÜRK">OSMAN ÖZKAN ÖZTÜRK</option>
+                        <option value="SEMİH TÜRKÜSEV">SEMİH TÜRKÜSEV</option>
+                        <option value="DERYA TAŞKIN">DERYA TAŞKIN</option>
+                        <option value="ÜMÜT SALMAN">ÜMÜT SALMAN</option>
+                        <option value="NAZİRE BÜLBÜL">NAZİRE BÜLBÜL</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Takviye Talebi</label>
+                    <select id="takviye" onchange="toggleDayPicker()"><option value="Yok">Gerekmiyor</option><option value="Hepsi">Her Gün Lazım</option><option value="Secili">Sadece Belirli Günler</option></select>
+                </div>
+                <div id="dayPickerCont" style="display:none; grid-column: 1 / -1;">
+                    <label>Takviye İstediğin Tarihleri Seç</label>
+                    <div id="specificDaysList" class="day-picker"></div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-add" id="btnIsle" onclick="kaydet()">VERİYİ İŞLE</button>
+                <button class="btn" style="background:#64748b; color:white;" onclick="formuTemizle()">TEMİZLE</button>
+            </div>
+        </div>
+
+        <datalist id="isimList"></datalist>
+        <datalist id="sicilList"></datalist>
+
+        <div class="panel" style="display:flex; gap:10px; align-items:flex-end;">
+            <div style="flex:1;"><label>Arama</label><input type="text" id="aramaInput" onkeyup="ara()" placeholder="İsim veya grup ara..."></div>
+            <button class="btn btn-excel" onclick="excelAktar()">📊 EXCEL</button>
+        </div>
+
+        <table>
+            <thead><tr><th>Tür/Grup</th><th>Personel</th><th>Tarihler</th><th>Takviye</th><th>Eylem</th></tr></thead>
+            <tbody id="izinListesi"></tbody>
+        </table>
+    </div>
+
+    <div id="vardiyaPage" class="page">
+        <div class="panel">
+            <div class="calendar-nav">
+                <button class="nav-btn" onclick="changeMonth(-1)">◀ Geri</button>
+                <h3 id="currentMonthTitle" style="color:var(--accent); margin:0;">Aylık Durum</h3>
+                <button class="nav-btn" onclick="changeMonth(1)">İleri ▶</button>
+            </div>
+            <div class="calendar-header"><div>PZT</div><div>SAL</div><div>ÇAR</div><div>PER</div><div>CUM</div><div>CMT</div><div>PAZ</div></div>
+            <div class="calendar-grid" id="calendarContainer"></div>
+        </div>
+        <div id="vardiyaOzet" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;"></div>
+    </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWYGZ7rWKB-IRjL2t1JW8QDqIPRFAZzcVbGVwKO13pYwNhAB86tklN5BqjLRv0dxYJEA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe7EKKz0_xDwP1g-Fi_X4uFvDEsR8azkXVhsKPyNBErkzUx3aCibTa5q2J8CLwRdZE/exec";
 
-    function showStatus(text, color) {
-        const popup = document.getElementById('statusPopup');
-        popup.innerText = text; popup.style.background = color; popup.style.display = 'block';
-        setTimeout(() => { popup.style.display = 'none'; }, 3000);
+    const PERSONEL_HAFIZA = [{sicil:"1004151", isim:"KÜBRA RAHAT"}, {sicil:"1004739", isim:"SERENAY RABİA YUMUŞAK"}, {sicil:"1005876", isim:"SERDAR SUİÇMEZ"}, 
+        {sicil:"1004415", isim:"RECEP CEMAL ASLAN"}, {sicil:"1004696", isim:"ÖMER ŞAHİN"}, {sicil:"1005717", isim:"DOĞA ÇOKER"}, 
+        {sicil:"1002411", isim:"ALİ BAYRAKTAR"}, {sicil:"1004603", isim:"NURİ MUSTAFA UYAR"}, {sicil:"1004745", isim:"MURAT ÇINAROĞLU"}, 
+        {sicil:"1005707", isim:"ARDA KAAN BATUK"}, {sicil:"1003214", isim:"ELİF AKZANBAK"}, {sicil:"1004732", isim:"SENA ŞAHİN"}, 
+        {sicil:"1005721", isim:"AHMET KANDİŞ"}, {sicil:"1004468", isim:"BERK YUMRU"}, {sicil:"1005549", isim:"SÜMEYYE ŞAHİN"}, 
+        {sicil:"1005832", isim:"EMİRHAN SÜMER"}, {sicil:"1006048", isim:"AYŞE NUR BARTIN"}, {sicil:"1004600", isim:"GAMZE ADIGÜZEL"}, 
+        {sicil:"1004410", isim:"MUSTAFA DANIŞMAN"}, {sicil:"1001466", isim:"EDA SAROĞLU OLGUN"}, {sicil:"1005664", isim:"BAŞAK KOCABAŞ"}, 
+        {sicil:"1004300", isim:"EDİBE KAHRAMAN"}, {sicil:"1004324", isim:"UĞURCAN ULUDAŞDEMİR"}, {sicil:"1004168", isim:"EDİZ DİKSİREK"}, 
+        {sicil:"1005666", isim:"ESMA YILMAZ"}, {sicil:"1004839", isim:"EMİNE YENİYAPAN"}, {sicil:"1004951", isim:"ALEYNA NUR DENDEN"}, 
+        {sicil:"1004259", isim:"ALİ ERDEM SEVİNÇ"}, {sicil:"1004582", isim:"OĞUZHAN KARADAĞ"}, {sicil:"1004411", isim:"ONUR KUTLUAY"}, 
+        {sicil:"1005572", isim:"CUMALİ DİŞKAYA"}, {sicil:"1005557", isim:"İRFAN ONUR YURTKUL"}, {sicil:"1004359", isim:"BADE EROL"}, 
+        {sicil:"1004231", isim:"BERKAY YELMEN"}, {sicil:"1004815", isim:"ALİ ARSLAN"}, {sicil:"1004260", isim:"AYSUN TOKKUŞGİL"}, 
+        {sicil:"1005041", isim:"MUHAMMET EMİR GEDİK"}, {sicil:"1005281", isim:"DİLARA KAYA"}, {sicil:"1005550", isim:"EREN YILMAZ"}, 
+        {sicil:"1006130", isim:"ÖZGÜR TELAL"}, {sicil:"1004616", isim:"NURBANU ÖZDEMİR"}, {sicil:"1004573", isim:"HURİ NERGİZ KARAMAN YILMAZ"}, 
+        {sicil:"1004423", isim:"ÖZKAN TAŞDEMİR"}, {sicil:"1004917", isim:"SUDE KÜÇÜKAL"}, {sicil:"1004887", isim:"SERKAN KAPTU"}, 
+        {sicil:"1004517", isim:"YASİR ÇAĞLAR"}, {sicil:"1002491", isim:"SERBAY SEÇER"}, {sicil:"1005844", isim:"ERTUĞRUL ÇAKIR"}, 
+        {sicil:"1004883", isim:"MURAT TETİK"}, {sicil:"1004755", isim:"SENEM ŞUTANRIKULU"}, {sicil:"1004619", isim:"SERHAN SELİMCİK"}, 
+        {sicil:"1004178", isim:"MELİH CEYLAN"}, {sicil:"1006237", isim:"ELİF İKRA OSKAN"}, {sicil:"1005326", isim:"MELİSA YAVUZ"}, 
+        {sicil:"1005874", isim:"MERTALİ GÖZEL"}, {sicil:"1006138", isim:"SAMET CAN ÖZALTIN"}, {sicil:"1006233", isim:"ARDA YAMAN TEKOĞLU"}, 
+        {sicil:"1004428", isim:"ABDULLAH AKBULUT"}, {sicil:"1004750", isim:"ÇAĞDAŞ KORHAN"}, {sicil:"1005668", isim:"ONUR KARAKAYA"}, 
+        {sicil:"1004315", isim:"PINAR BUDAK"}, {sicil:"1004631", isim:"ECEMSU CEYLAN KILIÇ"}, {sicil:"1005678", isim:"RÜMEYSA EMİNE ÖZTÜRK"}, 
+        {sicil:"1005941", isim:"ABDULLAH EFE ÇAPKIN"}, {sicil:"1004802", isim:"BURCU ÇELİKTEN"}, {sicil:"1001391", isim:"EREN KEŞ"}, 
+        {sicil:"1004209", isim:"GÖKHAN ZENGİN"}, {sicil:"1004516", isim:"GÜLSEN ERYILMAZ"}, {sicil:"1005070", isim:"BETÜL AKSU"}, 
+        {sicil:"1005940", isim:"ZEYNEP NAZ ATAÇ"}, {sicil:"1002465", isim:"BATUHAN BABAOĞLU"}, {sicil:"1005323", isim:"AHMET AYDIN"}, 
+        {sicil:"1004594", isim:"HAMDİ İLKE TURAN"}, {sicil:"1006046", isim:"MUHAMMET YAVUZ"}, {sicil:"1005574", isim:"NİSA HAYAL ÖZGÜRLER"}, 
+        {sicil:"1005548", isim:"YİĞİT BUĞRA ERGİN"}, {sicil:"1005036", isim:"VEHBİ KALYONCU"}, {sicil:"1005590", isim:"SİNAN BOZKURT"}, 
+        {sicil:"1004666", isim:"CAN KAYNARPINAR"}, {sicil:"1004237", isim:"ARDA KUĞU"}, {sicil:"1002809", isim:"MURAT KÜÇÜK"}, 
+        {sicil:"1005970", isim:"ONUR İSKENDER"}, {sicil:"1004236", isim:"ALPEREN BÜYÜKYILMAZ"}, {sicil:"1005068", isim:"CANBERK SERDEN"}, 
+        {sicil:"1005155", isim:"EMİR VEFA YAY"}, {sicil:"1005083", isim:"MEHMET SIDDIK AYTAN"}, {sicil:"1005933", isim:"AYGÜL RİGAN"}, 
+        {sicil:"1005571", isim:"BERAT YASİN YILDIRIM"}, {sicil:"1004678", isim:"BURAK GÜL"}, {sicil:"1003436", isim:"ÖNCÜ CAN"}, 
+        {sicil:"1005034", isim:"MELİH ÖZŞAHİN"}, {sicil:"1006259", isim:"EDA FIRAT"}, {sicil:"1004944", isim:"FİGEN YILMAZ"}, 
+        {sicil:"1005330", isim:"ÖZGE AK"}, {sicil:"1004257", isim:"GÖKHAN DENİZ"}, {sicil:"1005119", isim:"İLHAN OKAN KAMİLOĞLU"}, 
+        {sicil:"1004715", isim:"MERT YAVAŞ"}, {sicil:"1005758", isim:"OSMAN KAHYA"}, {sicil:"1004420", isim:"YUSUF KAAN DÜZ"}, 
+        {sicil:"1005883", isim:"ELİF AKTAŞ KARDAŞ"}, {sicil:"1004443", isim:"BATUHAN SOĞANCI"}, {sicil:"1005816", isim:"HAVVA NUR AYYILDIZ"}, 
+        {sicil:"1006258", isim:"ÖMER FARUK YILDIRIM"}, {sicil:"1004489", isim:"ENES BALLI"}, {sicil:"1004369", isim:"DUYGU YESİN"}, 
+        {sicil:"1004870", isim:"İBRAHİM ZENGİN"}, {sicil:"1006298", isim:"BERKER BAŞLAMIŞLI"}, {sicil:"1002164", isim:"ŞABAN ACAR"}, 
+        {sicil:"1005861", isim:"SAMET MEMİŞ"}, {sicil:"1004623", isim:"BERFİN PEHLİVANOĞLU"}, {sicil:"1005074", isim:"ÖZGE ALKUZU"}, 
+        {sicil:"1005120", isim:"KAAN AKYÜZ"}, {sicil:"1005786", isim:"ERCAN PİŞKİN"}, {sicil:"1004719", isim:"HAKAN KIYÇAK"}, 
+        {sicil:"1004920", isim:"CEREN CANBAZ"}, {sicil:"1004664", isim:"ÖZNUR YILDIRIM"}, {sicil:"1004580", isim:"MERVE UZUN"}, 
+        {sicil:"1004387", isim:"EYLÜL ÖYKÜ EKİNCİ"}, {sicil:"1005959", isim:"MUSTAFA TEKGÜL"}, {sicil:"1004994", isim:"ONURCAN ÖZER"}, 
+        {sicil:"1005019", isim:"CEREN BALLI"}, {sicil:"1004837", isim:"MUHAMMET ALİ POLAT"}, {sicil:"1005961", isim:"RUMET KORKMAZ"}, 
+        {sicil:"1002466", isim:"ABDULLAH KAYA"}, {sicil:"1004938", isim:"REYHAN BAKAR"}, {sicil:"1005540", isim:"KÜBRA BAHÇELİ"}, 
+        {sicil:"1004955", isim:"AYDIN BAKAR"}, {sicil:"1003049", isim:"ERAY PIRLANT"}, {sicil:"1004413", isim:"OSMAN ERTUĞRUL ÇİL"}, 
+        {sicil:"1005523", isim:"NEVZAT ÇAKMAK"}, {sicil:"1002943", isim:"ŞÜKRÜ YILDIRAN"}, {sicil:"1005947", isim:"BÜŞRA ATMACA"}, 
+        {sicil:"1002791", isim:"ATAKAN ATEŞ"}, {sicil:"1004956", isim:"HAKAN SÜMER"}, {sicil:"1004749", isim:"BARTU SÜMER"}, 
+        {sicil:"1005831", isim:"TAHSİN SEFA FINDIKLI"}, {sicil:"1005118", isim:"ÇAĞATAY ÇUBUKCU"}, {sicil:"1005536", isim:"MİHRAP YALIN"}, 
+        {sicil:"1006136", isim:"EBRU TOPÇU"}, {sicil:"1004589", isim:"ÖZGE ADIGÜZEL"}, {sicil:"1002703", isim:"SİNAN DELEN"}, 
+        {sicil:"1005783", isim:"SAMET SALMAN"}, {sicil:"1006300", isim:"SEMİH CAN DUBACI"}, {sicil:"1005792", isim:"GÜL SİNEM İMDAT"}, 
+        {sicil:"1006173", isim:"ERHAN GÜL"}, {sicil:"1005712", isim:"SELİN YALÇINKAYA"}, {sicil:"1002720", isim:"EBRU YÜCELİRGİL"}, 
+        {sicil:"1005517", isim:"BÜLENT BOZKURT"}, {sicil:"1006297", isim:"EMİR YÜCE"}, {sicil:"1004306", isim:"NESLİHAN AKYOL"}, 
+        {sicil:"1006254", isim:"YUSUF YAĞIZ ŞEN"}, {sicil:"1004417", isim:"SEMİH ARSLAN"}, {sicil:"1005589", isim:"ZEYNEP POLAT"}, 
+        {sicil:"1004404", isim:"MEHMET CAN UÇAROĞLU"}, {sicil:"1004509", isim:"DERYA KURŞUN"}, {sicil:"1005570", isim:"BARIŞ NOYAN"}, 
+        {sicil:"1005137", isim:"ÖMER FARUK KİBAR"}, {sicil:"1006255", isim:"ENGİN YÜCELEN"}, {sicil:"1005672", isim:"ELANUR UYSAL"}, 
+        {sicil:"1003602", isim:"FATİH AKBAŞ"}, {sicil:"1006139", isim:"MERVE YURDAGÜL"}, {sicil:"1005021", isim:"MUSTAFA ÇAĞRI BOZKURT"}, 
+        {sicil:"1001619", isim:"GAMZE KERTİ ÖZAYDIN"}, {sicil:"1005001", isim:"ECEM ÖZ"}, {sicil:"1005087", isim:"UMUT KARAKOÇ"}, 
+        {sicil:"1005813", isim:"CEYDA ÖZBAY"}, {sicil:"1004705", isim:"COŞKUN YENİCİ"}, {sicil:"1002168", isim:"SAVAŞ GÜRÇAY"}, 
+        {sicil:"1004179", isim:"UĞUR LÜLELİ"}, {sicil:"1004195", isim:"YILMAZ FIRAT"}, {sicil:"1005805", isim:"ELİF BÜŞRA ALP"}, 
+        {sicil:"1006238", isim:"KUBİLAY DEMİREL"}, {sicil:"1004724", isim:"İSMAİL KEPKEP"}, {sicil:"1005515", isim:"KADİR CAN ÇOBANDAĞ"}, 
+        {sicil:"1004244", isim:"DENİZ CAN KAYA"}, {sicil:"1003383", isim:"EBRU DOĞAN"}, {sicil:"1006301", isim:"BİLGE YAREN ELİBOL"}, 
+        {sicil:"1004279", isim:"SEMİH ABUHAN"}, {sicil:"1002508", isim:"MUSTAFA ANIL ÇAYLIKOCA"}, {sicil:"1005529", isim:"EMRE CAN ÇAMUR"}, 
+        {sicil:"1002621", isim:"ŞERİF KEPKEP"}, {sicil:"1001601", isim:"CEM DÖNMÜŞ"}, {sicil:"1005324", isim:"AŞKIM ALARA YURTÇU"}, 
+        {sicil:"1004801", isim:"ÖZLEM BEDİR"}, {sicil:"1005423", isim:"İSMAİL TAŞÇI"}, {sicil:"1005677", isim:"ÖZGÜR FİŞENK"}, 
+        {sicil:"1004556", isim:"ANIL KEPENEK"}, {sicil:"1003121", isim:"PELİN ÇAYLIKOCA"}, {sicil:"1004988", isim:"SENEM NÜKTE İNCİRCİ"}, 
+        {sicil:"1004751", isim:"DENİZ KEPENEK"}, {sicil:"1004518", isim:"İDİL DEMİRDAŞ"}, {sicil:"1004267", isim:"DAVUT BEKDEMİR"}, 
+        {sicil:"1004818", isim:"ÖZGÜL KAYA"}, {sicil:"1004246", isim:"EDA GÜLMEZ"}, {sicil:"1004572", isim:"FATİH TUNCA"}, 
+        {sicil:"1006314", isim:"NUR MUHAMMED YIKILMAZ"}, {sicil:"1005565", isim:"İREM GÜLLER"}, {sicil:"1005887", isim:"SAİM KAAN IŞIDAN"}, 
+        {sicil:"1002239", isim:"BÜLENT KURT"}, {sicil:"1005843", isim:"EMİRBUĞRA KÜÇÜKKARACA"}, {sicil:"1004694", isim:"ŞEYMA YAPRAK"}, 
+        {sicil:"1004513", isim:"MUSTAFA KARABAL"}, {sicil:"1005555", isim:"SEMRA ORUÇOĞLU"}, {sicil:"1004661", isim:"DİLBER EZGİ KAMA"}, 
+        {sicil:"1004706", isim:"SAFA ALGÜN"}, {sicil:"1005877", isim:"EMİRHAN KURTULUŞ"}, {sicil:"1004637", isim:"ASLIHAN ŞAHİN KANDİŞ"}, 
+        {sicil:"1002748", isim:"BİLGE YAĞAN"}, {sicil:"1002214", isim:"MEHMET OCAK"}, {sicil:"1004500", isim:"MUSTAFA ÜLVAN"}, 
+        {sicil:"1005417", isim:"SAMET ERGÜN"}, {sicil:"1004562", isim:"BERKANT ŞEN"}, {sicil:"1005934", isim:"BUSE MELEK YALDIZ"}, 
+        {sicil:"1004255", isim:"KAAN OKUYUCU"}, {sicil:"1005579", isim:"FATMANUR OKUMUŞ"}, {sicil:"1005790", isim:"MUHAMMED ERGİN"}, 
+        {sicil:"1005127", isim:"MELİKE SÜLÜ"}, {sicil:"1006134", isim:"SUDE NUR AKTAŞ"}, {sicil:"1004915", isim:"BURCU KURT"}, 
+        {sicil:"1005103", isim:"AHMET HAKAN BAYNAL"}, {sicil:"1005960", isim:"OĞUZHAN KAPLAN"}, {sicil:"1004993", isim:"ALİ ERKAN"}, 
+        {sicil:"1004553", isim:"ALİ CEM ÖZBÜTÜN"}, {sicil:"1005880", isim:"AYÇA KALEM YEŞİL"}, {sicil:"1006293", isim:"İÇİM YAZICI"}, 
+        {sicil:"1005956", isim:"MEHMET DEMİR"}, {sicil:"1002572", isim:"YUNUS ÇAĞLAYAN"}, {sicil:"1001911", isim:"HAZAL ALKAN"}, 
+        {sicil:"1006240", isim:"YUSUF AKDOĞAN"}, {sicil:"1004564", isim:"BURAK MERT ŞENYAYLA"}, {sicil:"1004819", isim:"GİZEM ŞAHİN"}, 
+        {sicil:"1003184", isim:"ENES ERİKLİ"}, {sicil:"1005138", isim:"AYKUT KURUMLU"}, {sicil:"1004823", isim:"ÇAĞRI KÜÇÜKÇİRKİN"}, 
+        {sicil:"1005580", isim:"GÖKHAN BARDAK"}, {sicil:"1004437", isim:"OKTAY YAĞLI"}, {sicil:"1004473", isim:"FARUK ÜÇDEMİR"}, 
+        {sicil:"1003219", isim:"NİZAMETTİN BERKAY BEKCAN"}, {sicil:"1004416", isim:"SELİN GÖKTAŞ"}, {sicil:"1006292", isim:"HANDE NUR METİN"}, 
+        {sicil:"1004758", isim:"GİZEM KORUCU"}, {sicil:"1004205", isim:"MUSTAFA AKBAYIR"}, {sicil:"1004322", isim:"ŞEYHMUS ÜÇDEMİR"}, 
+        {sicil:"1004281", isim:"SAMET YEŞİLSU"}, {sicil:"1006142", isim:"EMİR AKŞAHİN"}, {sicil:"1004467", isim:"HAYRİ ÇAKIR"}, 
+        {sicil:"1005957", isim:"MEHTAP TEPE"}, {sicil:"1005153", isim:"SABAHADDİN AÇIKGÖZ"}, {sicil:"1006135", isim:"VALENTİN FYODOR AYKAÇ"}, 
+        {sicil:"1004882", isim:"MUSTAFA AVCIKAYA"}, {sicil:"1005886", isim:"ABDULKADİR KIVRAK"}, {sicil:"1004789", isim:"VURAL AĞIR"}, 
+        {sicil:"1006236", isim:"FİKRİ DEMİRAL"}, {sicil:"1004743", isim:"BURAK IŞIK"}, {sicil:"1004303", isim:"FURKAN AZİZ TULGAR"}, 
+        {sicil:"1004434", isim:"İSMAİL TONGUÇ KAHRAMAN"}, {sicil:"1004865", isim:"BARIŞ BAŞTÜRK"}, {sicil:"1002082", isim:"ZELAL BAŞTÜRK"}, 
+        {sicil:"1006235", isim:"SEDA GÜNDOĞDU"}, {sicil:"1005870", isim:"HAKAN YALÇIN"}, {sicil:"1005671", isim:"DİLARA KAYIKÇI"}, 
+        {sicil:"1004853", isim:"SEZER KONAŞ"}, {sicil:"1002815", isim:"SELİM YURTTAŞ"}, {sicil:"1004571", isim:"HAZAL ABUHAN"}, 
+        {sicil:"1005948", isim:"CEYDA GÖK"}, {sicil:"1004407", isim:"METEHAN IŞIK"}, {sicil:"1003714", isim:"OSMAN BURAK KIVRAK"}, 
+        {sicil:"1002686", isim:"ELA YALÇIN"}, {sicil:"1004700", isim:"LEVENT ÇOLAKOĞLU"}, {sicil:"1004331", isim:"DAMLA ÇOBAN"}, 
+        {sicil:"1005893", isim:"FATİH ÖZKAN"}, {sicil:"1005514", isim:"HİLAL KAYAŞ"}, {sicil:"1004691", isim:"EMRE BEYTER"}, 
+        {sicil:"1005141", isim:"EYLÜL İSKENDER"}, {sicil:"1002640", isim:"MUHAMMED BAYRAKTAR"}, {sicil:"1004247", isim:"EMİN ERDEN"}, 
+        {sicil:"1005152", isim:"MERT YENİLER"}, {sicil:"1004799", isim:"ECEM AKTEKE"}, {sicil:"1004427", isim:"YAĞMUR TURAN"}, 
+        {sicil:"1004278", isim:"ÖMER ÇİFTÇİ"}, {sicil:"1004307", isim:"ZEYNEP PELİT ERDEN"}, {sicil:"1006146", isim:"AYTAÇ ÇALIŞKAN"}, 
+        {sicil:"1004555", isim:"CEMİLE ARZU ÇİFTÇİ"}, {sicil:"1004925", isim:"ZEHRA TAŞKIRAN"}, {sicil:"1004690", isim:"DİLAN GÖKBUDAK"}, 
+        {sicil:"1004940", isim:"MUHAMMED SOYKAL"}, {sicil:"1006127", isim:"LEVENT TUZLU"}, {sicil:"1005012", isim:"ENES BAYAZIT"}, 
+        {sicil:"1004948", isim:"İSMAİL BİNGÖL"}, {sicil:"1002787", isim:"SİNEM YAZICI OUSSOUS"}, {sicil:"1004752", isim:"ABDULSAMET KAYABAŞ"}, 
+        {sicil:"1004565", isim:"BÜŞRA ERGİNÖZ"}, {sicil:"1004800", isim:"VEDAT BILDIRCIN"}, {sicil:"1002457", isim:"GÜRAY BAYSAL"}, 
+        {sicil:"1002561", isim:"İDRİS BİLKAY"}, {sicil:"1004629", isim:"MEMET GÖLGELEYEN"}, {sicil:"1004900", isim:"ÖMER GÖRGÜLÜ"}, 
+        {sicil:"1004362", isim:"RAMAZAN BERKAN KARA"}, {sicil:"1005675", isim:"FATİH KILIÇ"}, {sicil:"1004675", isim:"UMUT KÖSÜRE"}, 
+        {sicil:"1004863", isim:"ALPER YORULMAZ"}, {sicil:"1005334", isim:"EVREN TÜRK"}, {sicil:"1002574", isim:"MUHAMMET MUSTAFA ÇİMİŞ"}, 
+        {sicil:"1003888", isim:"ONUR UĞUR"}, {sicil:"1004314", isim:"IŞIL AYLİN ARABACI"}, {sicil:"1005952", isim:"HÜSEYİN DOĞAN"}, 
+        {sicil:"1004703", isim:"BARIŞ GÜLSEVİNÇ"}, {sicil:"1004729", isim:"SÜMEYYE İNCE"}, {sicil:"1004587", isim:"ZEYNEP ÇİMİŞ"}, 
+        {sicil:"1004921", isim:"EREN SALEP"}, {sicil:"1004478", isim:"BARIŞ CAN KILINÇ"}, {sicil:"1004370", isim:"İLAYDA NUR COŞKUNER"}, 
+        {sicil:"1004886", isim:"AYŞENUR KIRALİ"}, {sicil:"1005545", isim:"BURCU ARSLAN"}, {sicil:"1004161", isim:"ALPER EROĞLU"}, 
+        {sicil:"1005094", isim:"GAMZE BIKTIM BAĞÇİVAN"}, {sicil:"1004577", isim:"KERİM ATAOL ŞAHİNBOY"}, {sicil:"1005123", isim:"FURKAN CAN FINDIK"}, 
+        {sicil:"1003968", isim:"TUĞBA NUR AKGÜN"}, {sicil:"1004449", isim:"MEHMET CAN BATUR"}, {sicil:"1005022", isim:"İNANÇ ESMER"}, 
+        {sicil:"1005002", isim:"ERKAN AKGÜN"}, {sicil:"1005819", isim:"MÜJGAN KAZAN"}, {sicil:"1005038", isim:"TUĞBA KURŞUN"}, 
+        {sicil:"1004904", isim:"İLKER TAŞ"}, {sicil:"1006241", isim:"ANIL DİŞMENGİL"}, {sicil:"1004523", isim:"GAMZE ÇÖMETEN"}, 
+        {sicil:"1005745", isim:"GÜLŞAN GÜRSES"}, {sicil:"1004671", isim:"SEZAİ YANKU"}, {sicil:"1005788", isim:"BEDİRHAN ÖZKUL"}, 
+        {sicil:"1004579", isim:"KÜBRA ŞENYERLİ"}, {sicil:"1004406", isim:"MELİKE ÇAĞLAR"}, {sicil:"1005815", isim:"ÇAĞLAR UYGUR"}, 
+        {sicil:"1006050", isim:"RUMEYSA BURTGIL"}, {sicil:"1004701", isim:"SELVA NUR ÖKSÜZ"}, {sicil:"1005828", isim:"ONUR BAL"}, 
+        {sicil:"1004606", isim:"DENİZ SAKİN"}, {sicil:"1005519", isim:"DOĞA COŞKUN"}, {sicil:"1004611", isim:"HAKAN MUSTAFA GÜR"}, 
+        {sicil:"1005591", isim:"ŞENER GÖKHAN AHNAS"}, {sicil:"1004561", isim:"EMRAH ÇAĞLAYAN"}, {sicil:"1005789", isim:"YUSUF ENES KOÇAK"}, 
+        {sicil:"1005871", isim:"BARIŞ İRHAN"}, {sicil:"1005935", isim:"CAN BAYINDIR"}, {sicil:"1004713", isim:"FIRAT ARSLAN"}, 
+        {sicil:"1004612", isim:"YELİZ KILIÇ"}, {sicil:"1004850", isim:"NİLAY TUTUK"}, {sicil:"1004309", isim:"EMRE GÜRBÜZ"}, 
+        {sicil:"1003385", isim:"MİNE ÇELİKLİ"}, {sicil:"1006144", isim:"SAMET EMRE SAĞANDA"}, {sicil:"1004271", isim:"ERDAL KESKİN"}, 
+        {sicil:"1003202", isim:"ÜNAL EKİZ"}, {sicil:"1005914", isim:"KEREM AK"}, {sicil:"1005541", isim:"SEZİN KORKMAZ"}, 
+        {sicil:"1002673", isim:"YALÇIN IŞIK"}, {sicil:"1003649", isim:"EMRE TOKLAR"}, {sicil:"1004364", isim:"BUSE ONAN"}, 
+        {sicil:"1001392", isim:"NİZAM ASİLHAN TÜREDİOĞLU"}, {sicil:"1006319", isim:"TUNAHAN DOĞAN"}, {sicil:"1004289", isim:"ÖZGE SERTKAYA"}, 
+        {sicil:"1004469", isim:"NİHAN BEDİR"}, {sicil:"1004876", isim:"DERYA AKRALI"}, {sicil:"1004999", isim:"MELTEM AKKUŞ"}, 
+        {sicil:"1002541", isim:"HAKAN GÜNCÜ"}, {sicil:"1004569", isim:"EDA ARSLAN"}, {sicil:"1004585", isim:"VOLKAN ARAÇ"}, 
+        {sicil:"1004294", isim:"KÜBRA MERVE AKSU"}, {sicil:"1005554", isim:"MELİKE KARADAŞ"}, {sicil:"1006129", isim:"PELİNSU ŞAHİN"}, 
+        {sicil:"1006055", isim:"ALEYNA YILDIZ"}, {sicil:"1005924", isim:"BERFİN KIZIL"}, {sicil:"1004662", isim:"SELİM YÜRÜR"}, 
+        {sicil:"1004728", isim:"BERFİN DİNÇ"}, {sicil:"1004718", isim:"SEDANUR ÇELİK"}, {sicil:"1002644", isim:"SERTAÇ YILDIRIM"}, 
+        {sicil:"1005829", isim:"MELİSA ZEYNEP KENDAL"}, {sicil:"1005530", isim:"TUĞANA KARAMAN"}, {sicil:"1005051", isim:"EROL ENES ORAL"}, 
+        {sicil:"1005017", isim:"MERVE KÖK"}, {sicil:"1004477", isim:"SULTAN ADIYAMAN"}, {sicil:"1004788", isim:"TURABİ KONUK"}, 
+        {sicil:"1004630", isim:"ŞAFAK ARSLAN"}, {sicil:"1005868", isim:"YASİN KURTOĞLU"}, {sicil:"1005665", isim:"CEMİLE SEDEF GÖKNAR"}, 
+        {sicil:"1006137", isim:"ELİF ŞAHİN"}, {sicil:"1004273", isim:"GÜRKAN TALU"}, {sicil:"1006296", isim:"YÜŞA OZAN VARLI"}, 
+        {sicil:"1004942", isim:"FURKAN DAĞILMIŞ"}, {sicil:"1004357", isim:"MEHMETCAN VATAN"}, {sicil:"1004426", isim:"SİNAN KAYA"}, 
+        {sicil:"1005000", isim:"RIDVAN NURİ UMUTLU"}, {sicil:"1006131", isim:"AHMET YASİN DELİ"}, {sicil:"1005885", isim:"KEREM KANERALP AKSU"}, 
+        {sicil:"1006128", isim:"HALAT ORMAN"}, {sicil:"1005888", isim:"CEREN BAĞBEKLEYEN"}, {sicil:"1004419", isim:"TUBA BAL"}, 
+        {sicil:"1003500", isim:"NACİ EMRE İZMİRLİ"}, {sicil:"1005882", isim:"CEREN ERDOĞANLAR"}, {sicil:"1006316", isim:"DOLUNAY SOLAK"}, 
+        {sicil:"1005004", isim:"BURCU ERİL"}, {sicil:"1005674", isim:"ERTUĞRUL FUAT ATAÇ"}, {sicil:"1005713", isim:"UĞUR CAN GÜRBÜZ"}, 
+        {sicil:"1004805", isim:"NURETTİN TOPKARA"}, {sicil:"1004265", isim:"YUNUS ONUŞ"}, {sicil:"1004576", isim:"MAHMUT BERBEROĞLU"}, 
+        {sicil:"1005879", isim:"ERKUT TERZİ"}, {sicil:"1004282", isim:"SİBEL COŞKUN"}, {sicil:"1001856", isim:"DİLER YEŞİL"}, 
+        {sicil:"1006145", isim:"OKAN ERKUŞ"}, {sicil:"1004730", isim:"MURAT ÇOLTU"}, {sicil:"1004697", isim:"UĞUR SELVİ"}, 
+        {sicil:"1005420", isim:"HAZAR AKBULAK"}, {sicil:"1006251", isim:"ATA EMRE AKTOPRAK"}, {sicil:"1004617", isim:"PINAR HOŞNUT"}, 
+        {sicil:"1002134", isim:"CEREN TAYLAN"}, {sicil:"1002172", isim:"SEZER AKTOPRAK"}, {sicil:"1005531", isim:"EMRE ÖZGÜRBÜZ"}, 
+        {sicil:"1005594", isim:"SELİNA KAMALTDİNOVA"}, {sicil:"1004422", isim:"NİHAT YILDIRIM"}, {sicil:"1004844", isim:"SEDA AY"}, 
+        {sicil:"1006147", isim:"BAHA ÜSTÜNİŞ"}, {sicil:"1004510", isim:"BAHAR AKSÜT"}, {sicil:"1004581", isim:"MERT ÇAKRAK"}, 
+        {sicil:"1005954", isim:"İPEK DOĞAN"}, {sicil:"1006276", isim:"SERKAN ASLAN"}, {sicil:"1005740", isim:"EMRE YAPICI"}, 
+        {sicil:"1004175", isim:"HARUN ENGİN"}, {sicil:"1004098", isim:"EMRE SEYREK"}, {sicil:"1006223", isim:"SEMİH EJDER"}];
+
+    let izinler = [];
+    let currentViewDate = new Date();
+    const BAZ_YIL = 2026, BAZ_AY = 4, BAZ_GUN = 6; 
+
+    window.onload = async function() {
+        initDataLists();
+        await verileriBuluttanCek();
+    };
+
+    function formatDate(dateVal) {
+        if (!dateVal) return "";
+        let d = new Date(dateVal);
+        if (isNaN(d.getTime())) {
+            return dateVal.toString().includes('T') ? dateVal.split('T')[0] : dateVal;
+        }
+        let year = d.getFullYear();
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
-    async function verileriCek() {
-        const tbody = document.getElementById('tableBody');
+    async function verileriBuluttanCek() {
         try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            tbody.innerHTML = '';
-            data.forEach(p => {
-                tbody.innerHTML += `<tr>
-                    <td><input type="text" id="sicil_${p.sicil}" value="${p.sicil}" readonly></td>
-                    <td><input type="text" id="isim_${p.sicil}" value="${p.isim}"></td>
-                    <td><input type="text" id="mag_${p.sicil}" value="${p.magaza}"></td>
-                    <td><input type="text" id="var_${p.sicil}" value="${p.vardiya}"></td>
-                    <td><input type="number" id="tl_${p.sicil}" value="${p.tl}"></td>
-                    <td><input type="number" id="euro_${p.sicil}" value="${p.euro}"></td>
-                    <td><input type="number" id="adet_${p.sicil}" value="${p.adet}"></td>
-                    <td><input type="number" id="fis_${p.sicil}" value="${p.fis}"></td>
-                    <td><button class="btn-save" onclick="kaydet('${p.sicil}')">GÜNCELLE</button></td>
-                    <input type="hidden" id="poz_${p.sicil}" value="${p.pozisyon}">
-                    <input type="hidden" id="mgr_${p.sicil}" value="${p.magazaGrubu}">
-                    <input type="hidden" id="grup_${p.sicil}" value="${p.grup}">
-                </tr>`;
+            const response = await fetch(SCRIPT_URL + "?t=" + new Date().getTime());
+            const data = await response.json();
+            izinler = data.map((row, idx) => ({
+                sicil: row[0], isim: row[1], grup: row[2], dilim: row[3],
+                baslangic: formatDate(row[4]),
+                bitis: formatDate(row[5]),
+                onayVeren: row[6],
+                takviye: row[7], tur: row[8],
+                seciliTarihler: JSON.parse(row[9] || "[]").map(t => formatDate(t)),
+                realRowIndex: idx 
+            }));
+            tabloyuGuncelle();
+        } catch (e) {
+            console.error("Veri çekilemedi:", e);
+        }
+    }
+
+    function otomatikDoldur(tip) {
+        const isimInput = document.getElementById('isim');
+        const sicilInput = document.getElementById('sicil');
+        let bul;
+        if(tip === 'sicil') {
+            bul = PERSONEL_HAFIZA.find(p => p.sicil === sicilInput.value);
+        } else {
+            bul = PERSONEL_HAFIZA.find(p => p.isim.toUpperCase() === isimInput.value.toUpperCase());
+        }
+        if(bul) {
+            isimInput.value = bul.isim;
+            sicilInput.value = bul.sicil;
+            generateSpecificDays();
+        }
+    }
+
+    function getVardiyaDurumu(tarihStr) {
+        const parts = tarihStr.split('-');
+        const hedef = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        const baz = new Date(BAZ_YIL, BAZ_AY, BAZ_GUN);
+        hedef.setHours(0,0,0,0); baz.setHours(0,0,0,0);
+        const farkMs = hedef.getTime() - baz.getTime();
+        const farkGun = Math.round(farkMs / (1000 * 60 * 60 * 24));
+        let mod = farkGun % 4;
+        if (mod < 0) mod += 4;
+        return (mod === 0 || mod === 1) ? "1. Grup" : "2. Grup";
+    }
+
+    function generateSpecificDays() {
+        const bas = document.getElementById('baslangic').value;
+        const bit = document.getElementById('bitis').value;
+        const seciliGrup = document.getElementById('grup').value;
+        const container = document.getElementById('specificDaysList');
+        if (!bas || !bit) return;
+        container.innerHTML = '';
+        let dBas = new Date(bas + "T00:00:00");
+        let dBit = new Date(bit + "T00:00:00");
+        const gunler = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+        for (let d = new Date(dBas); d <= dBit; d.setDate(d.getDate() + 1)) {
+            const dateStr = formatDate(d);
+            const calisanGrup = getVardiyaDurumu(dateStr);
+            const gunAdi = gunler[d.getDay()];
+            const opt = document.createElement('div');
+            const isGrupMatch = (calisanGrup === seciliGrup);
+            opt.className = `day-opt ${isGrupMatch ? (seciliGrup === '1. Grup' ? 'g1-style' : 'g2-style') : ''}`;
+            opt.innerHTML = `<strong>${d.getDate()}.${d.getMonth()+1}</strong><span>${gunAdi}</span>`;
+            opt.dataset.date = dateStr;
+            opt.onclick = function() { this.classList.toggle('selected'); };
+            container.appendChild(opt);
+        }
+    }
+
+    function toggleDayPicker() {
+        const val = document.getElementById('takviye').value;
+        document.getElementById('dayPickerCont').style.display = (val === 'Secili') ? 'block' : 'none';
+        if(val === 'Secili') generateSpecificDays();
+    }
+
+    async function kaydet() {
+        const editIdx = document.getElementById('editIndex').value;
+        const fields = ['sicil', 'isim', 'grup', 'dilim', 'baslangic', 'bitis', 'onayVeren', 'takviye', 'tur'];
+        const data = {};
+        fields.forEach(f => data[f] = document.getElementById(f).value);
+        const selectedDates = [];
+        document.querySelectorAll('.day-opt.selected').forEach(opt => selectedDates.push(opt.dataset.date));
+        data.seciliTarihler = selectedDates;
+        data.satirNo = (editIdx !== "-1") ? izinler[editIdx].realRowIndex : -1;
+
+        if(!data.isim || !data.baslangic) return alert("Zorunlu alanları doldurun!");
+        const btn = document.getElementById('btnIsle');
+        btn.innerText = "İŞLENİYOR...";
+        btn.disabled = true;
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
-        } catch (e) { showStatus("Veri çekilemedi!", "#ef4444"); }
+            setTimeout(async () => {
+                await verileriBuluttanCek();
+                formuTemizle();
+                alert("İşlem Başarılı!");
+                btn.innerText = "VERİYİ İŞLE";
+                btn.disabled = false;
+            }, 1200);
+        } catch (e) { alert("Hata oluştu."); btn.disabled = false; }
     }
 
-    async function kaydet(sicil) {
-        const btn = event.target;
-        const payload = {
-            sicil: document.getElementById(`sicil_${sicil}`).value,
-            isim: document.getElementById(`isim_${sicil}`).value,
-            magaza: document.getElementById(`mag_${sicil}`).value,
-            vardiya: document.getElementById(`var_${sicil}`).value,
-            tl: document.getElementById(`tl_${sicil}`).value,
-            euro: document.getElementById(`euro_${sicil}`).value,
-            adet: document.getElementById(`adet_${sicil}`).value,
-            fis: document.getElementById(`fis_${sicil}`).value,
-            pozisyon: document.getElementById(`poz_${sicil}`).value,
-            magazaGrubu: document.getElementById(`mgr_${sicil}`).value,
-            grup: document.getElementById(`grup_${sicil}`).value
-        };
-        
-        btn.innerText = "⏳...";
-        try {
-            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            const result = await res.text();
-            if (result === "Veri Güncellendi") {
-                showStatus("Başarıyla Güncellendi", "#10b981");
-                btn.innerText = "GÜNCELLE";
-            }
-        } catch (e) { showStatus("Hata oluştu!", "#ef4444"); btn.innerText = "HATA"; }
+    function duzenle(index) {
+        const item = izinler[index]; 
+        document.getElementById('editIndex').value = index; 
+        document.getElementById('sicil').value = item.sicil;
+        document.getElementById('isim').value = item.isim;
+        document.getElementById('grup').value = item.grup;
+        document.getElementById('dilim').value = item.dilim;
+        document.getElementById('baslangic').value = item.baslangic;
+        document.getElementById('bitis').value = item.bitis;
+        document.getElementById('onayVeren').value = item.onayVeren;
+        document.getElementById('takviye').value = item.takviye;
+        document.getElementById('tur').value = item.tur;
+        toggleDayPicker();
+        if(item.takviye === 'Secili') {
+            generateSpecificDays();
+            setTimeout(() => {
+                const dates = item.seciliTarihler || [];
+                document.querySelectorAll('.day-opt').forEach(opt => {
+                    if(dates.includes(opt.dataset.date)) opt.classList.add('selected');
+                });
+            }, 100);
+        }
+        document.getElementById('btnIsle').innerText = "GÜNCELLEMEYİ KAYDET";
+        window.scrollTo(0,0);
     }
-    window.onload = verileriCek;
+
+    async function sil(index) {
+        if(confirm("Bu kayıt Excel'den tamamen silinsin mi?")) {
+            const item = izinler[index];
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "DELETE", satirNo: item.realRowIndex })
+                });
+                setTimeout(async () => {
+                    await verileriBuluttanCek();
+                    alert("Kayıt silindi.");
+                }, 1000);
+            } catch (e) { alert("Silme hatası."); }
+        }
+    }
+
+    function tabloyuGuncelle(data = izinler) {
+        const liste = document.getElementById('izinListesi'); liste.innerHTML = '';
+        data.forEach((item, index) => {
+            liste.innerHTML += `<tr>
+                <td><span class="badge" style="border:1px solid ${item.tur === 'Raporlu' ? '#ef4444':'transparent'}">${item.tur}</span><br><span class="badge ${item.grup === '1. Grup' ? 'g1':'g2'}">${item.grup}</span></td>
+                <td><strong>${item.isim}</strong><br><small>${item.dilim}</small></td>
+                <td>${item.baslangic} / ${item.bitis}</td>
+                <td>${item.takviye !== 'Yok' ? '⚠️ Takviye' : 'Yok'}</td>
+                <td>
+                    <button onclick="duzenle(${index})" style="color:#f59e0b; background:none; border:none; cursor:pointer; font-weight:800;">DÜZENLE</button>
+                    <button onclick="sil(${index})" style="color:#ef4444; background:none; border:none; cursor:pointer; font-weight:800; margin-left:10px;">SİL</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function ara() {
+        const k = document.getElementById('aramaInput').value.toLowerCase();
+        const filtrelenmis = izinler.filter(i => Object.values(i).some(v => v.toString().toLowerCase().includes(k)));
+        tabloyuGuncelle(filtrelenmis);
+    }
+
+    function formuTemizle() {
+        document.getElementById('editIndex').value = "-1";
+        ['sicil', 'isim', 'onayVeren', 'baslangic', 'bitis'].forEach(f => document.getElementById(f).value = '');
+        document.getElementById('takviye').value = 'Yok';
+        document.getElementById('specificDaysList').innerHTML = '';
+        document.getElementById('btnIsle').innerText = "VERİYİ İŞLE";
+        toggleDayPicker();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.includes(tab==='kayit'?'Kayıt':'Takvim'));
+        if(btn) btn.classList.add('active');
+        document.getElementById(tab + 'Page').classList.add('active');
+        if(tab === 'vardiya') renderCalendar();
+    }
+
+    function changeMonth(offset) {
+        currentViewDate.setMonth(currentViewDate.getMonth() + offset);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const container = document.getElementById('calendarContainer');
+        container.innerHTML = '';
+        const year = currentViewDate.getFullYear();
+        const month = currentViewDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        document.getElementById('currentMonthTitle').innerText = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(currentViewDate);
+        
+        for (let x = 0; x < startOffset; x++) container.innerHTML += `<div class="cal-day" style="opacity:0.2"></div>`;
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const calisanGrup = getVardiyaDurumu(dStr);
+            const gunlukKayitlar = izinler.filter(i => dStr >= i.baslangic && dStr <= i.bitis && i.grup === calisanGrup);
+            
+            let gunduzCount = 0, geceCount = 0, birbirCount = 0;
+            gunlukKayitlar.forEach(i => {
+                let lazim = (i.takviye === 'Hepsi') || (i.takviye === 'Secili' && i.seciliTarihler && i.seciliTarihler.includes(dStr));
+                if (lazim) { 
+                    if (i.dilim === 'Gündüz') gunduzCount++; 
+                    else if (i.dilim === 'Gece') geceCount++;
+                    else if (i.dilim === 'Bir-Bir') birbirCount++;
+                }
+            });
+
+            const dayDiv = document.createElement('div');
+            dayDiv.className = `cal-day ${calisanGrup === '1. Grup' ? 'g1-work-day' : 'g2-work-day'}`;
+            
+            let tHtml = gunduzCount > 0 ? `<span class="need-staff" style="background:#fbbf24; color:#000;">☀️ Gündüz: ${gunduzCount}</span>` : '';
+            tHtml += geceCount > 0 ? `<span class="need-staff" style="background:#475569;">🌙 Gece: ${geceCount}</span>` : '';
+            tHtml += birbirCount > 0 ? `<span class="need-staff" style="background:#8b5cf6;">⚖️ Bir-Bir: ${birbirCount}</span>` : '';
+
+            const iznCount = gunlukKayitlar.filter(x => x.tur === 'İzinli').length;
+            const rapCount = gunlukKayitlar.filter(x => x.tur === 'Raporlu').length;
+            
+            dayDiv.innerHTML = `<div class="cal-date"><span>${day}</span><span style="font-size:8px; color:var(--accent)">${calisanGrup.split(' ')[0]}.G</span></div>
+                <div class="cal-content">${(iznCount+rapCount) > 0 ? `<div style="font-size:10px;">${iznCount>0?'🏖️'+iznCount:''} ${rapCount>0?'🏥'+rapCount:''}</div>` : ''}${tHtml}</div>`;
+            container.appendChild(dayDiv);
+        }
+        vardiyaRaporuOlustur();
+    }
+
+    function vardiyaRaporuOlustur() {
+        const ozet = document.getElementById('vardiyaOzet'); ozet.innerHTML = '';
+        const year = currentViewDate.getFullYear();
+        const month = currentViewDate.getMonth();
+        
+        ["1. Grup", "2. Grup"].forEach(g => {
+            const list = izinler.filter(i => {
+                const iBas = new Date(i.baslangic + "T00:00:00");
+                const iBit = new Date(i.bitis + "T00:00:00");
+                return i.grup === g && (
+                    (iBas.getMonth() === month && iBas.getFullYear() === year) || 
+                    (iBit.getMonth() === month && iBit.getFullYear() === year)
+                );
+            });
+            let h = `<div class="panel"><h4>${g} - ${new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(currentViewDate)}</h4><ul style="list-style:none; font-size:12px; margin-top:10px;">`;
+            if(list.length === 0) h += `<li style="opacity:0.5">Bu ay kayıt bulunmuyor.</li>`;
+            list.forEach(p => h += `<li style="margin-bottom:5px; border-bottom:1px solid var(--border); padding-bottom:3px;">${p.tur === 'Raporlu' ? '🏥' : '🏖️'} ${p.isim} <span style="float:right; opacity:0.6">${p.dilim}</span></li>`);
+            ozet.innerHTML += h + '</ul></div>';
+        });
+    }
+
+    function excelAktar() {
+        const ws = XLSX.utils.json_to_sheet(izinler);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Kayitlar");
+        XLSX.writeFile(wb, "M4_Genel_Rapor.xlsx");
+    }
+
+    function initDataLists() {
+        const iList = document.getElementById('isimList');
+        const sList = document.getElementById('sicilList');
+        iList.innerHTML = ''; sList.innerHTML = '';
+        PERSONEL_HAFIZA.forEach(p => {
+            iList.innerHTML += `<option value="${p.isim}">`;
+            sList.innerHTML += `<option value="${p.sicil}">`;
+        });
+    }
 </script>
 </body>
 </html>
